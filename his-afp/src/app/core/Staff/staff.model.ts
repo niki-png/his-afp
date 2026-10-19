@@ -13,6 +13,8 @@ export interface StaffMember {
   isActive: boolean;
 }
 
+export type StaffMemberRes = Omit<StaffMember, 'isActive'>;
+
 export interface NewStaffMember extends Pick<StaffMember, 'username' | 'role'> {
   password: string;
 }
