@@ -1,8 +1,10 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { GestioneStaff } from '../../core/Staff/gestione-staff';
+import { TabellaStaff } from '../../pattern/tabella-staff/tabella-staff';
 
 @Component({
   selector: 'his-gestione-personale',
+  imports: [TabellaStaff],
   templateUrl: './gestione-personale.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
