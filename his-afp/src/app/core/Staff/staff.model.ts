@@ -6,6 +6,11 @@ export const UserRoleLabel: Record<UserRole, string> = {
   AMM: 'Amministrativo',
 };
 
+export const UserRoleOptions = (Object.keys(UserRoleLabel) as UserRole[]).map((value) => ({
+  value,
+  label: UserRoleLabel[value],
+}));
+
 export interface StaffMember {
   id: number;
   username: string;
