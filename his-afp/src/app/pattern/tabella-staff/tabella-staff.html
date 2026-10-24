@@ -1,0 +1,48 @@
+<p-table
+  [value]="gestioneStaff.staff()"
+  dataKey="id"
+  sortField="username"
+  [sortOrder]="1"
+  [tableStyle]="{ 'min-width': '40rem' }"
+>
+  <ng-template #caption>Operatori in forza: {{ gestioneStaff.staff().length }}</ng-template>
+  <ng-template #header>
+    <tr>
+      <th pSortableColumn="username">Username <p-sortIcon field="username" /></th>
+      <th pSortableColumn="role">Ruolo <p-sortIcon field="role" /></th>
+      <th pSortableColumn="isActive">Stato <p-sortIcon field="isActive" /></th>
+      <th>Azioni</th>
+    </tr>
+  </ng-template>
+  <ng-template #body let-member>
+    <tr>
+      <td>{{ member.username }}</td>
+      <td>{{ roleLabel(member.role) }}</td>
+      <td>
+        @if (member.isActive) {
+          <p-tag severity="success" value="Attivo" />
+        } @else {
+          <p-tag severity="danger" value="Disattivato" />
+        }
+      </td>
+      <td>
+        <p-button
+          (onClick)="editing.set(member)"
+          [rounded]="true"
+          [text]="true"
+          ariaLabel="Modifica {{ member.username }}"
+          icon="pi pi-pencil"
+        />
+      </td>
+    </tr>
+  </ng-template>
+  <ng-template #emptymessage>
+    <tr>
+      <td colspan="4">Nessun operatore presente</td>
+    </tr>
+  </ng-template>
+</p-table>
+
+@if (editing(); as member) {
+  <his-modifica-staff (closed)="editing.set(null)" [member]="member" />
+}

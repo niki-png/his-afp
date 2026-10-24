@@ -1,0 +1,32 @@
+<p-dialog
+  (onHide)="closed.emit()"
+  [modal]="true"
+  [visible]="true"
+  header="Modifica {{ member().username }}"
+>
+  <form (ngSubmit)="onSubmit()" [formGroup]="editForm" class="flex flex-col gap-4">
+    <div class="flex flex-col">
+      <label for="editRole">Ruolo:</label>
+      <p-select
+        [options]="roleOptions"
+        appendTo="body"
+        class="w-2xs"
+        formControlName="role"
+        inputId="editRole"
+        optionLabel="label"
+        optionValue="value"
+      />
+    </div>
+    <div class="flex flex-row items-center gap-2">
+      <p-toggle-switch formControlName="isActive" inputId="editActive" />
+      <label for="editActive">Operatore attivo</label>
+    </div>
+    @if (saveError(); as error) {
+      <p-message severity="error">{{ error }}</p-message>
+    }
+    <div class="flex flex-row gap-4">
+      <p-button [loading]="saving()" label="Salva" type="submit" />
+      <p-button (onClick)="closed.emit()" label="Annulla" severity="secondary" variant="outlined" />
+    </div>
+  </form>
+</p-dialog>

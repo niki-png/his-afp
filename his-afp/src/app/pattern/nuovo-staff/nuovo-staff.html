@@ -1,0 +1,90 @@
+<form (ngSubmit)="onSubmit()" [formGroup]="staffForm">
+  <p-fieldset legend="Nuovo operatore">
+    <div class="flex flex-row flex-wrap items-start">
+      <div class="flex w-xs flex-col p-4">
+        <label for="username">Username:</label>
+        <input
+          [invalid]="showError('username')"
+          autocomplete="off"
+          class="w-2xs"
+          formControlName="username"
+          id="username"
+          pInputText
+          type="text"
+        />
+        @if (checkingUsername()) {
+          <p-message severity="secondary" variant="simple">Verifica disponibilità...</p-message>
+        }
+        @if (showError('username', 'required')) {
+          <p-message severity="error" variant="simple">
+            Il campo 'Username' è obbligatorio.
+          </p-message>
+        }
+        @if (showError('username', 'maxlength')) {
+          <p-message severity="error" variant="simple">
+            Il campo 'Username' non può superare i 50 caratteri.
+          </p-message>
+        }
+        @if (showError('username', 'pattern')) {
+          <p-message severity="error" variant="simple">
+            Sono ammessi solo lettere, numeri, '.', '_' e '-'.
+          </p-message>
+        }
+        @if (showError('username', 'usernameTaken')) {
+          <p-message severity="error" variant="simple">Username già in uso.</p-message>
+        }
+        @if (showError('username', 'usernameCheckFailed')) {
+          <p-message severity="error" variant="simple">
+            Impossibile verificare lo username, riprovare.
+          </p-message>
+        }
+      </div>
+      <div class="flex w-xs flex-col p-4">
+        <label for="password">Password:</label>
+        <p-password
+          [feedback]="false"
+          [invalid]="showError('password')"
+          [toggleMask]="true"
+          [fluid]="true"
+          autocomplete="new-password"
+          class="w-2xs"
+          formControlName="password"
+          inputId="password"
+        />
+        @if (showError('password', 'required')) {
+          <p-message severity="error" variant="simple">
+            Il campo 'Password' è obbligatorio.
+          </p-message>
+        }
+        @if (showError('password', 'minlength')) {
+          <p-message severity="error" variant="simple">
+            La password deve contenere almeno 4 caratteri.
+          </p-message>
+        }
+      </div>
+      <div class="flex w-xs flex-col p-4">
+        <label for="role">Ruolo:</label>
+        <p-select
+          [invalid]="showError('role')"
+          [options]="roleOptions"
+          class="w-2xs"
+          formControlName="role"
+          inputId="role"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="Seleziona un ruolo"
+        />
+        @if (showError('role', 'required')) {
+          <p-message severity="error" variant="simple">Il campo 'Ruolo' è obbligatorio.</p-message>
+        }
+      </div>
+    </div>
+    @if (saveError(); as error) {
+      <p-message severity="error">{{ error }}</p-message>
+    }
+    <div class="flex flex-row gap-4 pt-3">
+      <p-button [disabled]="!canSave()" [loading]="saving()" label="Salva" type="submit" />
+      <p-button (onClick)="staffForm.reset()" label="Reset" severity="warn" variant="outlined" />
+    </div>
+  </p-fieldset>
+</form>
