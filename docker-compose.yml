@@ -8,8 +8,6 @@ services:
       POSTGRES_USER: sio_user
       POSTGRES_PASSWORD: sio_password
       POSTGRES_DB: sio_db
-    ports:
-      - "5432:5432"
     volumes:
       - pg_data:/var/lib/postgresql/data
       - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
@@ -19,8 +17,6 @@ services:
   backend:
     build: ./backend
     container_name: sio-backend
-    #    ports:
-    #      - "3000:3000"
     environment:
       DB_HOST: db
       DB_USER: sio_user
@@ -98,3 +94,5 @@ volumes:
 networks:
   frontend-net:
   backend-net:
+    # Nessun accesso verso l'esterno: backend e database comunicano solo tra loro e con il gateway
+    internal: true
