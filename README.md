@@ -72,7 +72,7 @@ his-afp
 3. Spostarsi nella cartella del progetto: `cd his-afp`
 4. Creare un nuovo branch per le modifiche: `git checkout -b uf15-2026/nome-cognome`
 5. Avviare i container Docker: `docker-compose up -d --build`
-6. Accedere al backend API su `http://localhost:3000`
+6. Accedere al backend API tramite il gateway su `http://localhost/api`
 
 # Avvio dei servizi
 
@@ -100,8 +100,13 @@ docker-compose up -d --build --no-deps backend
 
 # Accessi
 
-- **Backend API:** `http://localhost:3000`
-- **Database PostgreSQL:** `localhost:5432` (user: `sio_user`, password: `sio_password`, database: `sio_db`)
+Tutto il traffico passa dal gateway, l'unico container che pubblica porte sull'host:
+
+- **Portale Produzione:** `http://localhost`
+- **Portale Test:** `http://localhost:8080`
+- **Portale Sviluppo:** `http://localhost:8999`
+- **Backend API:** `http://localhost/api` (es. `http://localhost/api/health`)
+- **Database PostgreSQL:** non raggiungibile dall'esterno; è accessibile solo dal backend nella rete protetta
 
 # Test delle API
 
@@ -116,6 +121,7 @@ Allinterno della cartella `docs/` sono presenti documenti dettagliati riguardant
 
 - Documentazione delle API: [docs/API.md](docs/API.md)
 - Struttura del Database: [docs/DATABASE.md](docs/DATABASE.md)
+- Migrazione infrastrutturale e guida ai test: [docs/MIGRAZIONE-INFRASTRUTTURA.md](docs/MIGRAZIONE-INFRASTRUTTURA.md)
 
 # Contribuire
 

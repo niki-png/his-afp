@@ -1,4 +1,4 @@
 ### GET request to example server
-GET http://localhost:3000/resources/triage-colors
+GET http://localhost/api/resources/triage-colors
 #Authorization: Bearer {{jwt_token}}
 ###

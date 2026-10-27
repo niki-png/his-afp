@@ -160,3 +160,74 @@ Per un sistema sanitario in produzione, Docker Compose su un singolo host resta 
    - repliche e health probe garantiscono l'alta disponibilità.
 
 Il passaggio a Kubernetes ha però un costo di complessità e di competenze non trascurabile: è giustificato solo quando servono alta disponibilità, scalabilità o più nodi. Per l'attuale dimensione del progetto, i miglioramenti del punto 1 danno il maggior beneficio con il minor costo.
+
+---
+
+## 6. Guida ai test
+
+Tutti i comandi si eseguono dalla cartella principale del progetto. Le verifiche sul traffico passano **dal gateway**; `docker exec` si usa solo per simulare un utente o un processo che si trova *dentro* un container.
+
+### 6.1 Avvio pulito
+
+```bash
+docker compose down
+docker compose up -d --build
+```
+
+> Il `down` è necessario se lo stack era già attivo con la vecchia configurazione: una rete esistente non può diventare `internal` senza essere ricreata.
+
+### 6.2 Reti e servizi collegati
+
+```bash
+docker network inspect his-afp_frontend-net -f '{{range .Containers}}{{.Name}} {{end}}'
+docker network inspect his-afp_backend-net -f '{{range .Containers}}{{.Name}} {{end}}'
+docker network inspect his-afp_backend-net -f '{{.Internal}}'
+```
+
+**Atteso:** `frontend-net` contiene `sio-fe-prod`, `sio-fe-test`, `sio-fe-sio` e `sio-gateway`; `backend-net` contiene `sio-backend`, `sio-postgres` e `sio-gateway`; l'ultimo comando stampa `true`.
+
+### 6.3 Il gateway è l'unico container con porte pubblicate
+
+```bash
+for c in sio-gateway sio-backend sio-postgres sio-fe-prod sio-fe-test sio-fe-sio; do echo "$c: $(docker port $c | tr '\n' ' ')"; done
+nc -z -w 2 localhost 5432 && echo APERTA || echo CHIUSA
+```
+
+**Atteso:** solo `sio-gateway` mostra porte (`80`, `8080`, `8999`); tutti gli altri hanno la riga vuota. La porta 5432 risulta `CHIUSA`.
+
+### 6.4 Il sistema funziona passando dal gateway
+
+```bash
+for p in 80 8080 8999; do echo "porta $p: $(curl -s -o /dev/null -w '%{http_code}' http://localhost:$p/)"; done
+curl -s http://localhost/api/health
+```
+
+**Atteso:** i tre portali (produzione, test, sviluppo) rispondono `200`; l'health check restituisce `"database":"CONNECTED"`, a conferma che il percorso gateway → backend → database funziona.
+
+### 6.5 Validazione: il database è inesistente per il frontend di produzione
+
+```bash
+docker exec sio-fe-prod nslookup db
+docker exec sio-fe-prod ping -c 1 db
+```
+
+**Atteso:** `nslookup` risponde `server can't find db: NXDOMAIN`; `ping` risponde `ping: bad address 'db'`. Il nome del database non esiste nella rete del frontend.
+
+Prova anche con l'indirizzo IP, per dimostrare che l'isolamento non dipende solo dal DNS:
+
+```bash
+DB_IP=$(docker inspect sio-postgres -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}')
+docker exec sio-fe-prod ping -c 1 -W 2 "$DB_IP"
+```
+
+**Atteso:** `1 packets transmitted, 0 packets received, 100% packet loss`.
+
+> Lo stesso risultato si ottiene sostituendo `sio-fe-prod` con `sio-fe-test` o `sio-fe-sio`.
+
+### 6.6 La rete protetta non ha accesso verso l'esterno
+
+```bash
+docker exec sio-backend node -e "fetch('https://example.com').then(()=>console.log('RAGGIUNTO')).catch(()=>console.log('BLOCCATO'))"
+```
+
+**Atteso:** `BLOCCATO`. Backend e database non possono aprire connessioni verso internet.

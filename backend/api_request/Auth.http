@@ -1,5 +1,5 @@
 ### POST request to authenticate a user
-POST http://localhost:3000/auth/login
+POST http://localhost/api/auth/login
 Content-Type: application/json
 
 {
